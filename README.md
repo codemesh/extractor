@@ -1,4 +1,0 @@
-extractor
-=========
-
-The html extractor
