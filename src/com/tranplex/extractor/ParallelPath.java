@@ -30,41 +30,42 @@ public class ParallelPath {
         return root;
 	}
 	public void parseNode(String node, PathNode curNode, PathNode childNode, PathNode.Child child){
+		child.setChild(childNode);
         if(node.indexOf('#') >= 0){
             parseIdNode(node, curNode, child);
-            child.setChild(childNode);
         }
         // classes-parsing should go before all-parsing, as classes-parsing can include all-parsing
         else if(node.indexOf('.') > 0){
             parseClassesNode(node, curNode, child);
-            child.setChild(childNode);
         }
         else if(node.indexOf('*') > 0){
             parseAllNode(node, curNode, child);
-            child.setChild(childNode);
         }
         else if(node.indexOf('|') > 0){
             String[] parallel = node.split("\\|");
             parseNode(parallel[0], curNode, childNode, child);
             parseNode(parallel[1], curNode, childNode, curNode.getParallelChild());
             curNode.getChild().setSibling(curNode.getParallelChild());
-            child.setChild(childNode);
             curNode.getParallelChild().setChild(childNode);
             curNode.setParallel(true);
         }
         else if(node.indexOf('@') > 0){
             parseIndexNode(node, curNode, child);
-            child.setChild(childNode);
+        }
+        else if(node.indexOf(':') > 0){
+        	parseAttrNode(node, curNode, child);
         }
         else{
             parseTagNode(node, curNode, child);
-            child.setChild(childNode);
         }
     }
 	public void parseIdNode(String node, PathNode curNode, PathNode.Child child){
-		String[] tagAndId = node.split("#");
+		String[] tagAndId = node.split("#|:");
 		child.setTag(tagAndId[0]);
 		child.setId(tagAndId[1]);
+		if(tagAndId.length == 3){
+			curNode.setAttr(tagAndId[2]);
+		}
 	}
 	
 	public void parseClassesNode(String node, PathNode curNode, PathNode.Child child){
@@ -94,28 +95,40 @@ public class ParallelPath {
     }
 
     public void parseIndexNode(String node, PathNode curNode, PathNode.Child child){
-        String[] tagAndIndex = node.split("@");
+        String[] tagAndIndex = node.split("@|:");
         parseTagNode(tagAndIndex[0], curNode, child);
         child.setIndex(Integer.parseInt(tagAndIndex[1]));
+        if(tagAndIndex.length == 3){
+        	curNode.setAttr(tagAndIndex[2]);
+        }
+    }
+    
+    public void parseAttrNode(String node, PathNode curNode, PathNode.Child child){
+    	String[] tagAndAttr = node.split(":");
+    	parseTagNode(tagAndAttr[0], curNode, child);
+    	child.setAttr(tagAndAttr[1]);
     }
 
     public static void main(String[] args){
     	ParallelPath p = new ParallelPath();
     	PathNode title = p.parseFromString("html/body/div#page/div#main/div@1/div@1/div.articleTitle/div|div@1/h2");
-    	PathNode content= p.parseFromString("html/body/div#page/div#main/div@1/div@1/div.articleContent*/div@0|div@1/p");
-    	//root.dump();
-    	File input = new File("/home/fengyu/Downloads/nytimes3.html");
+    	PathNode nytimes= p.parseFromString("html/body/div#page/div#main/div@1/div@1/div.articleContent*/div@0|div@1/p");
+    	//PathNode google = p.parseFromString("html/body/div@1/div@1/div/div@3/div@1/div@1/div@1/div/ol/li.g*/div/h3/a");
+    	PathNode google = p.parseFromString("html/body/div@3/div@1/div/div@3/div@1/div@1/div@1/div@1/div/ol/li.g*/div/h3/a:href");
+    	File input = new File("/home/fengyu/data/mt/times_google/business_2012_09_p2.html");
+    	//File input = new File("/home/fengyu/Downloads/nytimes.html");
     	Document doc = null;
     	try{
     		doc = Jsoup.parse(input, "UTF-8");
+    		//doc = Jsoup.connect("http://http://cn.nytimes.com/article/world/2012/09/10/c10arableft/dual/").get();
     	}
     	catch (IOException e){
     		System.out.println(e.getMessage());
     		return;
     	}
-    	PathNode.NodeWriter writer = content.new NodeWriter();
-    	
-    	title.extractDoc(doc, writer);
-    	content.extractDoc(doc, writer);
+    	PathNode.NodeWriter writer = google.new NodeWriter();
+    	google.dump();
+    	//title.extractDoc(doc, writer);
+    	google.extractDoc(doc, writer);
     }
 }

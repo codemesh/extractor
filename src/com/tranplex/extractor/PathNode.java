@@ -50,15 +50,19 @@ public class PathNode {
 		public void setClasses(String[] classes) {
 			this.classes = classes;
 		}
+		public void setAttr(String attr) {
+			this.child.setAttr(attr);
+		}
 	}
 	
 	class NodeWriter{
-		public void write(Element e){
-			System.out.println(e.text());
+		public void write(String content){
+			System.out.println(content);
 		}
 	}
 	String name;
 	Element element;
+	String attr;
 	Child child = new Child();
 	Child parallelChild;
 	boolean allChild;
@@ -170,7 +174,12 @@ public class PathNode {
 		return child.child;
 	}
 	public void writeElement(Element element, NodeWriter writer){
-		writer.write(element);
+		if(this.attr != null){
+			writer.write(element.attr(this.attr));
+		}
+		else{
+			writer.write(element.text());
+		}
 	}
 	public Child getChild() {
 		return child;
@@ -184,7 +193,7 @@ public class PathNode {
 	
 	@Override
 	public String toString() {
-		return "PathNode [name=" + name +
+		return "PathNode [name=" + name + ", attr=" + attr +
 				//", element=" + element + 
 				//", parallelChild=" + parallelChild +
 				", allChild="
@@ -192,6 +201,9 @@ public class PathNode {
 	}
 	public void dump(){
 		System.out.println(this);
+	}
+	public void setAttr(String attr) {
+		this.attr = attr;
 	}
 
 }
