@@ -55,9 +55,21 @@ public class PathNode {
 		}
 	}
 	
-	class NodeWriter{
+	class NodeWriter implements IParallelNodeWriter{
 		public void write(String content){
 			System.out.println(content);
+		}
+
+		@Override
+		public void switchBack() {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void switchToParallel() {
+			// TODO Auto-generated method stub
+			
 		}
 	}
 	String name;
@@ -101,19 +113,21 @@ public class PathNode {
 		return null;
 	}
 	
-	public void extractDoc(Document doc, NodeWriter writer){
+	public void extractDoc(Document doc, IParallelNodeWriter writer){
 		extract(doc, writer);
 	}
 	
-	public void extract(Element element, NodeWriter writer){
+	public void extract(Element element, IParallelNodeWriter writer){
 		if(this.leaf){
 			writeElement(element, writer);
 			return;
 		}
 		else if(this.parallel){
 			PathNode sourceNode = getChildNode(child, element);
+            writer.switchBack();
 			sourceNode.extract(writer);
 			PathNode targetNode = getChildNode(parallelChild, element);
+            writer.switchToParallel();
 			targetNode.extract(writer);
 			return;
 		}
@@ -158,7 +172,7 @@ public class PathNode {
 			
 	}
 	
-	public void extract(NodeWriter writer){
+	public void extract(IParallelNodeWriter writer){
 		extract(this.element, writer);
 	}
 	
@@ -173,7 +187,7 @@ public class PathNode {
 		}
 		return child.child;
 	}
-	public void writeElement(Element element, NodeWriter writer){
+	public void writeElement(Element element, IParallelNodeWriter writer){
 		if(this.attr != null){
 			writer.write(element.attr(this.attr));
 		}
