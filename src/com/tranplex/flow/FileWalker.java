@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
@@ -14,8 +15,11 @@ public class FileWalker {
 	private Iterator<String> inputFileIterator;
 	BufferedReader lineReader;
 	private int nLines;
-	private int successLines;
-	private int failedLines;
+	//private ArrayList<String> successLines = new ArrayList<String>();
+	private int successLinesNum;
+	private ArrayList<String> failedLines = new ArrayList<String>();
+	private GregorianCalendar justNow = new GregorianCalendar();
+	private int idGenerator;
 	
 	public synchronized String getNextLine(){
 		String line = null;
@@ -80,21 +84,38 @@ public class FileWalker {
 		return nLines;
 	}
 	
-	public synchronized void linesResult(boolean OK){
+	public synchronized void linesResult(String line, boolean OK){
 		if(OK){
-			successLines++;
+			//successLines.add(line);
+			++ successLinesNum;
 		}
 		else{
-			failedLines++;
+			failedLines.add(line);
 		}
 	}
 	
 	public int getLinesResult(boolean OK){
 		if(OK){
-			return successLines;
+			//return successLines.size();
+			return successLinesNum;
 		}
 		else{
-			return failedLines;
+			return failedLines.size();
 		}
+	}
+	
+	public ArrayList<String> getFailedLines(){
+		return failedLines;
+	}
+
+	public synchronized String genNextOutFileName() {
+		return String.format("%1$tY%1$tm%1$te%1$tH%1$tM%2$04d", justNow, idGenerator ++);
+	}
+	
+	public static void main(String[] args){
+		FileWalker w = new FileWalker();
+		System.out.println(w.genNextOutFileName());
+		System.out.println(w.genNextOutFileName());
+		System.out.println(w.genNextOutFileName());
 	}
 }

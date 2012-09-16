@@ -5,20 +5,21 @@ import java.util.ArrayList;
 
 public class PageFetcher{
 	class FetchThread extends Thread{
-		private int id;
 		private FileWalker info;
 		public FetchThread(int id, FileWalker info){
-			this.id = id;
 			this.info = info;
 		}
 		public void run(){
 			String url = null;
-			String outputDir = info.getOutputDir(); 
-			int index = 1;
-			while((url = info.getNextLine()) != null){
+			String outputDir = info.getOutputDir();
+						while((url = info.getNextLine()) != null){
+				int paramStart = url.indexOf('?');
+				if(paramStart > 0){
+					url = url.substring(0, paramStart);
+				}
+				String fileSuffix= info.genNextOutFileName();
 				int retCode = 0;
-				String cmd = "wget -O " + outputDir + "/url_" + id + "_" + index + " " + url;
-				++ index;
+				String cmd = "wget -O " + outputDir + "/url_" + fileSuffix + " " + url;
 				try{
 					Process p = Runtime.getRuntime().exec(cmd);
 					retCode = p.waitFor();
@@ -27,7 +28,7 @@ public class PageFetcher{
 				}catch(InterruptedException e){
 					System.err.println(e.getMessage());
 				}
-				info.linesResult(retCode == 0);
+				info.linesResult(url, retCode == 0);
 			}
 		}
 	}
@@ -64,6 +65,12 @@ public class PageFetcher{
 				"\nFetch OK url: " + info.getLinesResult(true) +
 				"\nFetch fail url: " + info.getLinesResult(false)
 				+'\n');
+		if(info.getLinesResult(false) > 0){
+			System.out.println("List of failed url(s):");
+			for(String url: info.getFailedLines()){
+				System.out.println(url);
+			}
+		}
 	}
 	private static void help(){
 		System.err.println("usage: java <class>" + " -o <outputdir> <inputfile>+");

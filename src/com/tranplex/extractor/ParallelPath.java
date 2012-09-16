@@ -112,11 +112,11 @@ public class ParallelPath {
     public static void main(String[] args){
     	ParallelPath p = new ParallelPath();
     	PathNode title = p.parseFromString("html/body/div#page/div#main/div@1/div@1/div.articleTitle/div|div@1/h2");
-    	PathNode nytimes= p.parseFromString("html/body/div#page/div#main/div@1/div@1/div.articleContent*/div@0|div@1/p");
+    	PathNode nytimes= p.parseFromString("html/body/div#page/div#main/div@1/div@1/div.articleContent*/div@0|div@1");
     	//PathNode google = p.parseFromString("html/body/div@1/div@1/div/div@3/div@1/div@1/div@1/div/ol/li.g*/div/h3/a");
     	PathNode google = p.parseFromString("html/body/div@3/div@1/div/div@3/div@1/div@1/div@1/div@1/div/ol/li.g*/div/h3/a:href");
-    	File input = new File("/home/fengyu/data/mt/times_google/business_2012_09_p2.html");
-    	//File input = new File("/home/fengyu/Downloads/nytimes.html");
+    	//File input = new File("/home/fengyu/data/mt/times_google/business_2012_09_p2.html");
+    	File input = new File("/home/fengyu/data/mt/parallel/NYT/fetched_2012-09-152349/url_2012091523490004");
     	Document doc = null;
     	try{
     		doc = Jsoup.parse(input, "UTF-8");
@@ -127,8 +127,8 @@ public class ParallelPath {
     		return;
     	}
     	PathNode.NodeWriter writer = google.new NodeWriter();
-    	google.dump();
+    	//google.dump();
     	//title.extractDoc(doc, writer);
-    	google.extractDoc(doc, writer);
+    	nytimes.extractDoc(doc, writer);
     }
 }

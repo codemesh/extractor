@@ -71,6 +71,11 @@ public class PathNode {
 			// TODO Auto-generated method stub
 			
 		}
+		
+		@Override
+		public void close(){
+			;
+		}
 	}
 	String name;
 	Element element;
@@ -113,20 +118,33 @@ public class PathNode {
 		return null;
 	}
 	
-	public void extractDoc(Document doc, IParallelNodeWriter writer){
-		extract(doc, writer);
+	public boolean extractDoc(Document doc, IParallelNodeWriter writer){
+		boolean OK = true;
+		try{
+			extract(doc, writer);
+		}catch(BadDocException e){
+			System.err.println(e.getMessage());
+			OK = false;
+		}
+		return OK;
 	}
 	
-	public void extract(Element element, IParallelNodeWriter writer){
+	public void extract(Element element, IParallelNodeWriter writer) throws BadDocException{
 		if(this.leaf){
 			writeElement(element, writer);
 			return;
 		}
 		else if(this.parallel){
 			PathNode sourceNode = getChildNode(child, element);
+			if(sourceNode == null){
+				throw new BadDocException("Null source node");
+			}
             writer.switchBack();
 			sourceNode.extract(writer);
 			PathNode targetNode = getChildNode(parallelChild, element);
+			if(targetNode == null){
+				throw new BadDocException("Null target node");
+			}
             writer.switchToParallel();
 			targetNode.extract(writer);
 			return;
@@ -161,8 +179,9 @@ public class PathNode {
 		node.element = element;
 		while(true){
 			node = node.getChildNode(node.child, node.element);
-			if(node.element == null){
-				return;
+			if(node == null){// || node.child == null){
+				throw new BadDocException("Null child node");
+				//return;
 			}
 			if(node.leaf || node.parallel || node.allChild){
 				node.extract(node.element, writer);
@@ -172,7 +191,7 @@ public class PathNode {
 			
 	}
 	
-	public void extract(IParallelNodeWriter writer){
+	public void extract(IParallelNodeWriter writer) throws BadDocException{
 		extract(this.element, writer);
 	}
 	
@@ -184,6 +203,9 @@ public class PathNode {
 		else{
 //			System.out.println("element is: " + element);
 			child.child.element = getTagChildAt(element, child.tag, child.index);// element.getElementsByTag(child.tag).get(child.index);
+		}
+		if(child.child.element == null){
+			return null;
 		}
 		return child.child;
 	}
