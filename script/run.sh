@@ -20,6 +20,7 @@ google_result_dir=$1
 parallel_root=$2
 fetch_name=$(basename $google_result_dir)
 category=$(echo "$fetch_name" | grep -oP '^[-_a-zA-Z]+')
+yearmm=$(echo "$fetch_name" | grep -oP '[0-9]+[a-zA-Z_]+$')
 if [ "$category" == "" ]; then
     category="unknown"
 fi
@@ -31,16 +32,21 @@ cmd="touch $url_list"
 run_cmd $cmd
 cmd="$root/script/runconftool.sh $flow_package.UrlLister -o $url_list $google_results"
 run_cmd $cmd
+if [ $? -ne 0 ]; then
+    echo "ERROR Failed to list urls from google result, google may have blocked us."
+    exit 1;
+fi
 
 # fetch
 fetched_dir=fetched_$just_now
 cmd="mkdir $fetched_dir"
 run_cmd $cmd
-cmd="$root/script/runtool.sh $flow_package.PageFetcher -o $fetched_dir $url_list"
+#cmd="$root/script/runtool.sh $flow_package.PageFetcher -o $fetched_dir $url_list"
+cmd="$root/script/runconftool.sh $flow_package.PageFetcher -o $fetched_dir $url_list"
 run_cmd $cmd
 
 # parse
-parallel_category="$parallel_root/$fetch_name"
+parallel_category="$parallel_root/$yearmm/$fetch_name"
 if [ ! -d $parallel_category ]; then
     cmd="mkdir -p $parallel_category"
     run_cmd $cmd

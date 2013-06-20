@@ -23,7 +23,7 @@ yyyy=$(echo $yyyymm | grep -oP '^[0-9]{4}')
 mm=$(echo $yyyymm | grep -oP '[0-9]{2}$')
 month_abbr=$(date +%b -d $yyyymm"01")
 for page in `seq 1 100`; do
-    category_output_dir="$top_output_dir/$category""_p$page""_$yyyy$month_abbr/"
+    category_output_dir="$top_output_dir/$yyyy$month_abbr/$category""_p$page""_$yyyy$month_abbr/"
     cmd="mkdir -p $category_output_dir"
     run_cmd $cmd
     category_output_file=$category_output_dir/$category"_$yyyy""_$mm""_p$page.html"
@@ -37,11 +37,17 @@ for page in `seq 1 100`; do
         exit 1
     fi
     # To test whether this is the last google result page
-    grep -oP 'class="cur".+class="b navend"' $category_output_file | grep -o 'class="fl"' >& /dev/null
+    # Google seems to give two kinds of result pages, according to the request type - from likely robots or not
+    # grep -oP 'class="cur".+class="b navend"' $category_output_file | grep -o 'class="fl"' >& /dev/null
+    grep -oP '<b>\d+</b></td>.+>Next</span>' $category_output_file | grep -o 'class="fl"' >& /dev/null
     
     if [ $? -ne 0 ]; then
         break
     fi
+    # try to happy google
+    happy_google_seconds=$[$RANDOM % 60 + 13]
+    cmd="sleep $happy_google_seconds"
+    run_cmd $cmd
 done
 
     

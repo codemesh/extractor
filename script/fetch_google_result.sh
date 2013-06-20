@@ -22,9 +22,12 @@ yyyy=$(echo $yyyymm | grep -oP '^[0-9]{4}')
 mm=$(echo $yyyymm | grep -oP '[0-9]{2}$')
 start=$[($page_no - 1)  * 10]
 google_query="q=site%3Acn.nytimes.com%2Farticle%2F$category%2F$yyyy%2F$mm+inurl%3Adual"
+google_cookie="PREF=ID=6e67dbdb1e089cab:FF=0:LD=en:NW=1:CR=2:TM=1367592382:LM=1367592382:S=cEWqvo5pihSzZ4GC; NID=67=Unm8wN3BVMeGNaA2UJgRRp6EQgtmG1ephXNnCB46hthmncK8fFJiaDwTXHw23c_rN4mO61pd-_Ncbc8tO_r3vswj4cmy-_UPjmvBD-gYfgradSXSfbLRDzeEyPpr9t4Q"
+google_referer="https://www.google.com/"
 google_page="start=$start"
-google_cookie="NID=67=KBQb_ho3B25wlamCOx-GyQpU1a7Y9pK9DfNJCzvd7nHxVKI-45c6lCwLBJ7q9F8XOxTVEk_2meMsLLc94QLlfCm3hp64g4jzsFCss3ipkAoJzYU5ypPugva74kcKpJL3; PREF=ID=db941bc3bbe6d594:U=40af338b4159384b:FF=0:LD=en:NW=1:CR=2:TM=1367401194:LM=1367402789:S=r_X6ezqXu-EqCwCd; GDSESS=ID=90b4305f8bc46a9b:TM=1367402872:C=c:IP=125.39.34.208-:S=APGng0sQgJ8cFiIKC5Jalmzm48tkwV5COQ"
-google_ua="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1312.45 Safari/537.17"
+google_gsl="gs_l=serp.12...0.0.1.1234.0.0.0.0.0.0.0.0..0.0...0.0...1c..11.serp.hxk27iBioNg"
 
-fetch_cmd="curl -s -S -x https://localhost:8087 'http://www.google.com/search?newwindow=1&biw=1366&bih=638&start=10&output=search&sclient=psy-ab&$google_page&$google_query&btnK=' -b '$google_cookie' -A '$google_ua' -o $page_output"
+fetch_cmd="curl -s -S -x https://localhost:8087 -e '$google_referer' 'http://www.google.com/search?newwindow=1&biw=1366&bih=638&output=search&sclient=psy-ab&$google_query&$google_page' -b '$google_cookie' -A '$google_ua' -o $page_output"
+# This is really gossip
 run_cmd $fetch_cmd
+
